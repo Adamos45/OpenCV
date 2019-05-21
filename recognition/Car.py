@@ -15,7 +15,7 @@ class CarOpenCV:
         return img
 
     @staticmethod
-    def edgeDetecion(img):
+    def _edgeDetecion(img):
         imgGauss = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(50,50))
         imgGauss = clahe.apply(imgGauss)
@@ -26,7 +26,7 @@ class CarOpenCV:
         return rawLines
 
     @staticmethod
-    def calculateAngles(rawLines):
+    def _calculateAngles(rawLines):
         angles = []
         if not rawLines:
             print("No lines detected.")
@@ -39,11 +39,11 @@ class CarOpenCV:
         return angles
 
     @staticmethod
-    def groupAngles(angles):
+    def _groupAngles(angles):
         lines = []
         linesSize = 1
         groupSize = 1
-        angles.sort(key=CarOpenCV.sortFirst)
+        angles.sort(key=CarOpenCV._sortFirst)
         med = 0
         for angle in angles:
             if len(lines) == 0:
@@ -63,7 +63,7 @@ class CarOpenCV:
         return lines
 
     @staticmethod
-    def joinLines(lines):
+    def _joinLines(lines):
         newLines = []
         for line in lines:
             minX = sys.maxsize
@@ -89,7 +89,7 @@ class CarOpenCV:
         return newLines
 
     @staticmethod
-    def findIntersection(newLines,img,angles):
+    def _findIntersection(newLines,img,angles):
         height, width, channels = img.shape
         shapeGreenLine = LineString([(0, height / 2), (width, height / 2)])
         for line in newLines:
@@ -111,7 +111,7 @@ class CarOpenCV:
         return None
 
     @staticmethod
-    def calculatePosition(angles):
+    def _calculatePosition(angles):
         sum = 0
         it = 0
         if angles.count() > 2:
@@ -137,17 +137,17 @@ class CarOpenCV:
     def driving():
         #preparing data
         img = CarOpenCV.videoCapture()
-        rawLines = CarOpenCV.edgeDetecion(img)
-        angles = CarOpenCV.calculateAngles(rawLines)
-        lines = CarOpenCV.groupAngles(angles)
-        newLines = CarOpenCV.joinLines(lines)
-        CarOpenCV.findIntersection(newLines,img,angles)
-        return CarOpenCV.calculatePosition(angles)
+        rawLines = CarOpenCV._edgeDetecion(img)
+        angles = CarOpenCV._calculateAngles(rawLines)
+        lines = CarOpenCV._groupAngles(angles)
+        newLines = CarOpenCV._joinLines(lines)
+        CarOpenCV._findIntersection(newLines,img,angles)
+        return CarOpenCV._calculatePosition(angles)
 
     @staticmethod
     def parking():
         img = CarOpenCV.videoCapture()
-        lines = CarOpenCV.edgeDetecion(img)
+        lines = CarOpenCV._edgeDetecion(img)
         height, width, channels = img.shape
         shapeGreenLine = LineString([(width/2,height/2),(width/2,height)])
         angles = []
@@ -172,5 +172,5 @@ class CarOpenCV:
         return Messages.CONTINUE_TURNING
 
     @staticmethod
-    def sortFirst(val):
+    def _sortFirst(val):
         return val[0]
